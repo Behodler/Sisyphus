@@ -11,7 +11,8 @@ Users needed an additional reason to purchase Scarcity.
 3. The buyout price declines by 1 decay delta per day so that after 100 days, the price is zero.
 4. To become the reigning monarch you have to pay the buyout price. The current monarch receives 66% of the buyout price. The remaining 34% is burnt.
 5. Once the new monarch is established, the new buyout price is set at 4 times the price paid to become monarch.
-6. These parameters might change to accomodate the preferences of real world humans.
+6. If the deposing monarch wants, they can forward more than the required scarcity to bump the price up. The reigning monarch is still only paid in proportion of the original amount. The surplus is all burnt. 
+7. These parameters might change to accomodate the preferences of real world humans.
 
 
 ## Why is Scarcity burnt during transfer?
