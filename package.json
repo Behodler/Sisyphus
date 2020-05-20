@@ -1,0 +1,25 @@
+{
+  "name": "sisyphus",
+  "version": "1.0.0",
+  "description": "An alternate version of the King of the Hill game but where the buyout price declines with time. Behodler's Scarcity is the native token, not Eth.",
+  "main": "truffle-config.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WeiDaiEcosystem/Sisyphus.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/WeiDaiEcosystem/Sisyphus/issues"
+  },
+  "homepage": "https://github.com/WeiDaiEcosystem/Sisyphus#readme",
+  "dependencies": {
+    "@openzeppelin/contracts": "^3.0.1"
+  }
+}
