@@ -10,6 +10,9 @@ contract Sisyphus is Ownable {
     address public CurrentMonarch;
     uint256 public BuyoutAmount;
     uint256 public BuyoutTime;
+    uint256 public periodDuration;
+    uint256 public totalIncrements;
+    uint256 public rewardProportion;
     bool public enabled;
 
     event monarchChanged(
@@ -25,9 +28,34 @@ contract Sisyphus is Ownable {
 
     constructor() public {
         enabled = true;
+        rewardProportion = 66;
+        totalIncrements = 100;
+        periodDuration = 1 days;
     }
 
-    function seed(address scx) external {
+    function setTime(uint256 periodDurationType, uint256 _totalIncrements)
+        external
+        onlyOwner
+    {
+        require(periodDurationType < 4, "invalid period duration");
+        if (periodDurationType == 0) {
+            periodDuration = 1 seconds;
+        } else if (periodDurationType == 1) {
+            periodDuration = 1 minutes;
+        } else if (periodDurationType == 2) {
+            periodDuration = 1 hours;
+        } else if (periodDurationType == 3) {
+            periodDuration = 1 days;
+        }
+        totalIncrements = _totalIncrements;
+    }
+
+    function setRewardProportion(uint256 p) external onlyOwner {
+        require(p <= 100, "proportion must be a percentage between 0 and 100");
+        rewardProportion = p;
+    }
+
+    function seed(address scx) external onlyOwner {
         scarcity = ScarcityLike(scx);
         BuyoutTime = now;
     }
@@ -39,6 +67,7 @@ contract Sisyphus is Ownable {
             scarcityForwarded >= currentBuyout,
             "pretender must at forward at least as much Scx as the current buyout."
         );
+
         if (scarcityForwarded > 0) {
             require(
                 scarcity.transferFrom(
@@ -49,9 +78,11 @@ contract Sisyphus is Ownable {
                 "Scarcity transfer failed."
             );
         }
+
         BuyoutTime = now;
-        uint256 rewardForDeposed = currentBuyout.mul(66).div(100);
+        uint256 rewardForDeposed = currentBuyout.mul(rewardProportion).div(100);
         uint256 scarcityToBurn = scarcityForwarded.sub(rewardForDeposed);
+
         if (CurrentMonarch != address(0) && rewardForDeposed > 0) {
             require(
                 scarcity.transfer(CurrentMonarch, rewardForDeposed),
@@ -78,10 +109,17 @@ contract Sisyphus is Ownable {
         if (currentTime <= BuyoutTime) {
             return BuyoutAmount;
         }
-        uint256 daysElapsed = (now - BuyoutTime) / (1 days);
-        uint256 proportion = 100 - (daysElapsed > 100 ? 100 : daysElapsed);
+        uint256 incrementsElapsed = (now - BuyoutTime) / (periodDuration);
+        uint256 incrementsLeft = totalIncrements -
+            (
+                incrementsElapsed > totalIncrements
+                    ? totalIncrements
+                    : incrementsElapsed
+            );
 
-        uint256 newBuyoutAmount = BuyoutAmount.mul(proportion).div(100);
+        uint256 newBuyoutAmount = BuyoutAmount.mul(incrementsLeft).div(
+            totalIncrements
+        );
 
         return newBuyoutAmount <= BuyoutAmount ? newBuyoutAmount : BuyoutAmount;
     }

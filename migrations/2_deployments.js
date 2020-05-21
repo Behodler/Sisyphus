@@ -4,6 +4,8 @@ const Sisyphus = artifacts.require('Sisyphus')
 const fs = require('fs')
 module.exports = async function (deployer, network, accounts) {
     var mockScarcityInstance, sisyphusInstance
+    await deployer.deploy(Sisyphus)
+    sisyphusInstance = await Sisyphus.deployed();
 
     if (network === 'development') {
         await deployer.deploy(MockScarcity, 'MockScarcity', 'MSCX')
@@ -13,8 +15,7 @@ module.exports = async function (deployer, network, accounts) {
     else {
         scarcityAddress = '0xff1614C6B220b24D140e64684aAe39067A0f1CD0'
     }
-    await deployer.deploy(Sisyphus)
-    sisyphusInstance = await Sisyphus.deployed();
+   
     await sisyphusInstance.seed(scarcityAddress)
 
     let addressObject = { network, address: sisyphusInstance.address }

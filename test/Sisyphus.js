@@ -60,12 +60,31 @@ contract('sisyphus', accounts => {
         assert.equal(buyoutAfter, '40000')
 
         const totalScarcitySupplyAfter = new bigNumber((await scarcityInstance.totalSupply.call(primaryOptions)).toString())
-        const goforit = `before: ${totalScarcitySupply.toString()}, after: ${totalScarcitySupplyAfter.toString()}`
-        assert.equal(totalScarcitySupply.minus(totalScarcitySupplyAfter).toString(), '10000', goforit)
+        assert.equal(totalScarcitySupply.minus(totalScarcitySupplyAfter).toString(), '10000')
 
         await scarcityInstance.approve(sisyphusInstance.address, '10000000000', secondaryOptions)
         await expectThrow(sisyphusInstance.struggle(39999, primaryOptions), 'pretender must at forward at least as much Scx as the current buyout.')
 
+    })
+
+    test("buyout price declines in increments until reaching zero.", async () => {
+
+        await sisyphusInstance.setTime(0, 10, primaryOptions)
+        const priorBuyoutAmount = (await sisyphusInstance.BuyoutAmount.call()).toNumber()
+        await sisyphusInstance.struggle(priorBuyoutAmount, secondaryOptions)
+        const buyoutAmount = (await sisyphusInstance.BuyoutAmount.call()).toNumber()
+        assert.equal(buyoutAmount, priorBuyoutAmount * 4)
+
+
+        await time.pause(10)
+
+        const buyoutAmountAfter = (await sisyphusInstance.calculateCurrentBuyout.call()).toNumber()
+        assert.equal(buyoutAmountAfter, 0)
+
+        await sisyphusInstance.struggle(0, primaryOptions)
+
+        const buyoutAmountAfterPurchaseAtZero = (await sisyphusInstance.calculateCurrentBuyout.call()).toNumber()
+        assert.equal(buyoutAmountAfterPurchaseAtZero, 0)
     })
 
 })

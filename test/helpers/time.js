@@ -19,6 +19,12 @@ advanceTime = (time) => {
     });
 }
 
+pause = (duration) => {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => resolve(), duration*1000)
+    })
+}
+
 advanceBlock = async () => {
     return new Promise((resolve, reject) => {
         web3.currentProvider.send({
@@ -26,21 +32,22 @@ advanceBlock = async () => {
             method: "evm_mine",
             id: new Date().getTime()
         }, (err, result) => {
-			if (err) { return reject(err); }
-			const currentBlockNumber = web3.eth.getBlockNumber();
+            if (err) { return reject(err); }
+            const currentBlockNumber = web3.eth.getBlockNumber();
 
             return resolve(currentBlockNumber)
         });
     });
 }
 
-oneDay = () =>{
-	return 60*60*24;
+oneDay = () => {
+    return 60 * 60 * 24;
 }
 
 module.exports = {
     advanceTime,
     advanceBlock,
-	advanceTimeAndBlock,
-	oneDay
+    advanceTimeAndBlock,
+    oneDay,
+    pause
 }
