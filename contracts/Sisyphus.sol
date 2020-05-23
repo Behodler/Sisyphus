@@ -2,11 +2,12 @@ pragma solidity ^0.6.2;
 import "./facades/ScarcityLike.sol";
 import "../node_modules/@openzeppelin/contracts/access/Ownable.sol";
 import "../node_modules/@openzeppelin/contracts/math/SafeMath.sol";
-
+import "./facades/FaucetLike.sol";
 
 contract Sisyphus is Ownable {
     using SafeMath for uint256;
     ScarcityLike public scarcity;
+    FaucetLike public faucet;
     address public CurrentMonarch;
     uint256 public BuyoutAmount;
     uint256 public BuyoutTime;
@@ -55,8 +56,9 @@ contract Sisyphus is Ownable {
         rewardProportion = p;
     }
 
-    function seed(address scx) external onlyOwner {
+    function seed(address scx, address f) external onlyOwner {
         scarcity = ScarcityLike(scx);
+        faucet = FaucetLike(f);
         BuyoutTime = now;
     }
 
@@ -81,7 +83,7 @@ contract Sisyphus is Ownable {
 
         BuyoutTime = now;
         uint256 rewardForDeposed = currentBuyout.mul(rewardProportion).div(100);
-        uint256 scarcityToBurn = scarcityForwarded.sub(rewardForDeposed);
+        uint256 scarcityForFaucet = scarcityForwarded.sub(rewardForDeposed);
 
         if (CurrentMonarch != address(0) && rewardForDeposed > 0) {
             require(
@@ -89,10 +91,17 @@ contract Sisyphus is Ownable {
                 "reward transfer failed."
             );
         } else {
-            scarcityToBurn += rewardForDeposed;
+            scarcityForFaucet += rewardForDeposed;
         }
-        if (scarcityToBurn > 0) {
-            scarcity.burn(scarcityToBurn);
+        if (scarcityForFaucet > 0) {
+            scarcity.approve(address(faucet),uint(-1));
+            faucet.takeDonation(scarcityForFaucet);
+        }
+
+        uint256 sponsorBalance = scarcity.balanceOf(address(this));
+
+        if (sponsorBalance > 0) {
+            require(scarcity.transfer(msg.sender, sponsorBalance),"transfer from sponsor balance failed.");
         }
         emit monarchChanged(
             CurrentMonarch,

@@ -1,11 +1,14 @@
 const MockScarcity = artifacts.require('MockScarcity')
 const Sisyphus = artifacts.require('Sisyphus')
+const Faucet = artifacts.require('Faucet')
 
 const fs = require('fs')
 module.exports = async function (deployer, network, accounts) {
-    var mockScarcityInstance, sisyphusInstance
+    var mockScarcityInstance, sisyphusInstance, faucetInstance
     await deployer.deploy(Sisyphus)
+    await deployer.deploy(Faucet)
     sisyphusInstance = await Sisyphus.deployed();
+    faucetInstance = await Faucet.deployed()
 
     if (network === 'development') {
         await deployer.deploy(MockScarcity, 'MockScarcity', 'MSCX')
@@ -16,7 +19,7 @@ module.exports = async function (deployer, network, accounts) {
         scarcityAddress = '0xff1614C6B220b24D140e64684aAe39067A0f1CD0'
     }
    
-    await sisyphusInstance.seed(scarcityAddress)
+    await sisyphusInstance.seed(scarcityAddress, faucetInstance.address)
 
     let addressObject = { network, address: sisyphusInstance.address }
     const fileName = 'sisyphusAddress.json'
