@@ -13,7 +13,9 @@ module.exports = async function (deployer, network, accounts) {
     if (network === 'development') {
         await deployer.deploy(MockScarcity, 'MockScarcity', 'MSCX')
         mockScarcityInstance = await MockScarcity.deployed()
-        scarcityAddress = mockScarcityInstance.address
+        const scx = lookForScarcityAddress()
+        scarcityAddress = scx === '0x0' ? mockScarcityInstance.address : scx
+
     }
     else {
         scarcityAddress = '0xff1614C6B220b24D140e64684aAe39067A0f1CD0'
@@ -38,4 +40,14 @@ module.exports = async function (deployer, network, accounts) {
         existingObject.push(addressObject)
 
     fs.writeFileSync(fileName, JSON.stringify(existingObject, null, 4))
+}
+
+const lookForScarcityAddress = () => {
+    const scarcityLocation = "/home/justin/weidai ecosystem/Sisyphus/scarcityAddress.txt"
+    if (fs.existsSync(scarcityLocation)) {
+        const address = fs.readFileSync(scarcityLocation).toString()
+        fs.writeFileSync(scarcityLocation, "0x0")
+        console.log('scarcity address pickup: ' + address)
+        return address.trim()
+    }
 }

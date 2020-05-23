@@ -80,7 +80,6 @@ contract Sisyphus is Ownable {
                 "Scarcity transfer failed."
             );
         }
-//between
         buyoutTime = now;
         uint256 rewardForDeposed = currentBuyout.mul(rewardProportion).div(100);
         uint256 scarcityForFaucet = scarcityForwarded.sub(rewardForDeposed);
