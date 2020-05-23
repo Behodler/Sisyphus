@@ -18,9 +18,9 @@ module.exports = async function (deployer, network, accounts) {
     else {
         scarcityAddress = '0xff1614C6B220b24D140e64684aAe39067A0f1CD0'
     }
-   
-    await sisyphusInstance.seed(scarcityAddress, faucetInstance.address)
 
+    await sisyphusInstance.seed(scarcityAddress, faucetInstance.address)
+    await faucetInstance.seed(scarcityAddress)
     let addressObject = { network, address: sisyphusInstance.address }
     const fileName = 'sisyphusAddress.json'
     const existing = fs.readFileSync(fileName)
@@ -37,5 +37,5 @@ module.exports = async function (deployer, network, accounts) {
     if (!found)
         existingObject.push(addressObject)
 
-    fs.writeFileSync(fileName, JSON.stringify(existingObject,null,4))
+    fs.writeFileSync(fileName, JSON.stringify(existingObject, null, 4))
 }

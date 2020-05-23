@@ -8,9 +8,9 @@ contract Sisyphus is Ownable {
     using SafeMath for uint256;
     ScarcityLike public scarcity;
     FaucetLike public faucet;
-    address public CurrentMonarch;
-    uint256 public BuyoutAmount;
-    uint256 public BuyoutTime;
+    address public currentMonarch;
+    uint256 public buyoutAmount;
+    uint256 public buyoutTime;
     uint256 public periodDuration;
     uint256 public totalIncrements;
     uint256 public rewardProportion;
@@ -29,7 +29,7 @@ contract Sisyphus is Ownable {
 
     constructor() public {
         enabled = true;
-        rewardProportion = 66;
+        rewardProportion = 80;
         totalIncrements = 100;
         periodDuration = 1 days;
     }
@@ -59,7 +59,7 @@ contract Sisyphus is Ownable {
     function seed(address scx, address f) external onlyOwner {
         scarcity = ScarcityLike(scx);
         faucet = FaucetLike(f);
-        BuyoutTime = now;
+        buyoutTime = now;
     }
 
     function struggle(uint256 scarcityForwarded) public {
@@ -80,14 +80,14 @@ contract Sisyphus is Ownable {
                 "Scarcity transfer failed."
             );
         }
-
-        BuyoutTime = now;
+//between
+        buyoutTime = now;
         uint256 rewardForDeposed = currentBuyout.mul(rewardProportion).div(100);
         uint256 scarcityForFaucet = scarcityForwarded.sub(rewardForDeposed);
 
-        if (CurrentMonarch != address(0) && rewardForDeposed > 0) {
+        if (currentMonarch != address(0) && rewardForDeposed > 0) {
             require(
-                scarcity.transfer(CurrentMonarch, rewardForDeposed),
+                scarcity.transfer(currentMonarch, rewardForDeposed),
                 "reward transfer failed."
             );
         } else {
@@ -104,21 +104,21 @@ contract Sisyphus is Ownable {
             require(scarcity.transfer(msg.sender, sponsorBalance),"transfer from sponsor balance failed.");
         }
         emit monarchChanged(
-            CurrentMonarch,
+            currentMonarch,
             msg.sender,
             scarcityForwarded,
             rewardForDeposed
         );
-        CurrentMonarch = msg.sender;
-        BuyoutAmount = scarcityForwarded.mul(4);
+        currentMonarch = msg.sender;
+        buyoutAmount = scarcityForwarded.mul(4);
     }
 
     function calculateCurrentBuyout() public view returns (uint256) {
         uint256 currentTime = now;
-        if (currentTime <= BuyoutTime) {
-            return BuyoutAmount;
+        if (currentTime <= buyoutTime) {
+            return buyoutAmount;
         }
-        uint256 incrementsElapsed = (now - BuyoutTime) / (periodDuration);
+        uint256 incrementsElapsed = (now - buyoutTime) / (periodDuration);
         uint256 incrementsLeft = totalIncrements -
             (
                 incrementsElapsed > totalIncrements
@@ -126,10 +126,10 @@ contract Sisyphus is Ownable {
                     : incrementsElapsed
             );
 
-        uint256 newBuyoutAmount = BuyoutAmount.mul(incrementsLeft).div(
+        uint256 newBuyoutAmount = buyoutAmount.mul(incrementsLeft).div(
             totalIncrements
         );
 
-        return newBuyoutAmount <= BuyoutAmount ? newBuyoutAmount : BuyoutAmount;
+        return newBuyoutAmount <= buyoutAmount ? newBuyoutAmount : buyoutAmount;
     }
 }

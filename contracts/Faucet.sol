@@ -12,6 +12,11 @@ contract Faucet is Ownable {
     uint256 public dripInterval;
     uint256 public drips;
 
+    constructor () public { //approx 375 days if average block time 15 seconds
+        dripInterval = 15;
+        drips = 144000;
+    }
+
     function seed(address scx) external onlyOwner {
         scarcity = ScarcityLike(scx);
     }

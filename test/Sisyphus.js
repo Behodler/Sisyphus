@@ -24,26 +24,26 @@ contract('sisyphus', accounts => {
 
 
     test("initial buy should not affect scarcity balance", async () => {
-        const monarch = (await sisyphusInstance.CurrentMonarch.call()).toString()
+        const monarch = (await sisyphusInstance.currentMonarch.call()).toString()
         assert.equal(monarch, '0x0000000000000000000000000000000000000000')
-        const buyoutBefore = (await sisyphusInstance.BuyoutAmount.call()).toString()
-        const buyoutTimeBefore = new bigNumber((await sisyphusInstance.BuyoutTime.call()).toString())
+        const buyoutBefore = (await sisyphusInstance.buyoutAmount.call()).toString()
+        const buyoutTimeBefore = new bigNumber((await sisyphusInstance.buyoutTime.call()).toString())
         assert.equal(buyoutBefore, '0')
         const initialBlock = (await web3.eth.getBlockNumber());
 
         for (let blockNumber = (await web3.eth.getBlockNumber()); blockNumber <= initialBlock + 100; blockNumber = (await time.advanceBlock()));
         await sisyphusInstance.struggle(0, primaryOptions)
 
-        const monarchAfter = (await sisyphusInstance.CurrentMonarch.call()).toString()
+        const monarchAfter = (await sisyphusInstance.currentMonarch.call()).toString()
         assert.equal(monarchAfter, accounts[0])
-        const buyoutAfter = (await sisyphusInstance.BuyoutAmount.call()).toString()
+        const buyoutAfter = (await sisyphusInstance.buyoutAmount.call()).toString()
         assert.equal(buyoutAfter, '0')
-        const buyoutTimeAfter = new bigNumber(((await sisyphusInstance.BuyoutTime.call()).toString()))
+        const buyoutTimeAfter = new bigNumber(((await sisyphusInstance.buyoutTime.call()).toString()))
         assert.isTrue(buyoutTimeAfter.isGreaterThan(buyoutTimeBefore))
     })
 
     test("initial buy with positive amount should increase buyout while burning all", async () => {
-        const buyoutBefore = (await sisyphusInstance.BuyoutAmount.call()).toString()
+        const buyoutBefore = (await sisyphusInstance.buyoutAmount.call()).toString()
         assert.equal(buyoutBefore, '0')
         const initialBlock = (await web3.eth.getBlockNumber());
 
@@ -54,9 +54,9 @@ contract('sisyphus', accounts => {
         await scarcityInstance.approve(sisyphusInstance.address, '10000000000', secondaryOptions)
         await sisyphusInstance.struggle(10000, secondaryOptions)
 
-        const monarchAfter = (await sisyphusInstance.CurrentMonarch.call()).toString()
+        const monarchAfter = (await sisyphusInstance.currentMonarch.call()).toString()
         assert.equal(monarchAfter, accounts[1])
-        const buyoutAfter = (await sisyphusInstance.BuyoutAmount.call()).toString()
+        const buyoutAfter = (await sisyphusInstance.buyoutAmount.call()).toString()
         assert.equal(buyoutAfter, '40000')
 
         const totalScarcitySupplyAfter = new bigNumber((await scarcityInstance.totalSupply.call(primaryOptions)).toString())
@@ -70,10 +70,10 @@ contract('sisyphus', accounts => {
     test("buyout price declines in increments until reaching zero.", async () => {
 
         await sisyphusInstance.setTime(0, 10, primaryOptions)
-        const priorBuyoutAmount = (await sisyphusInstance.BuyoutAmount.call()).toNumber()
-        await sisyphusInstance.struggle(priorBuyoutAmount, secondaryOptions)
-        const buyoutAmount = (await sisyphusInstance.BuyoutAmount.call()).toNumber()
-        assert.equal(buyoutAmount, priorBuyoutAmount * 4)
+        const priorbuyoutAmount = (await sisyphusInstance.buyoutAmount.call()).toNumber()
+        await sisyphusInstance.struggle(priorbuyoutAmount, secondaryOptions)
+        const buyoutAmount = (await sisyphusInstance.buyoutAmount.call()).toNumber()
+        assert.equal(buyoutAmount, priorbuyoutAmount * 4)
 
 
         await time.pause(10)
