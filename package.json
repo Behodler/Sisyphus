@@ -20,7 +20,7 @@
   },
   "homepage": "https://github.com/WeiDaiEcosystem/Sisyphus#readme",
   "dependencies": {
-    "@openzeppelin/contracts": "^3.0.1",
+    "@openzeppelin/contracts": "^4.4.2",
     "bignumber.js": "^9.0.0"
   }
 }
